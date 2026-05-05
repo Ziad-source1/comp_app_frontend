@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import Navbar from "../compenent/Navbar";
 import Footer from "../compenent/Footer";
+import { useNavigate } from "react-router-dom";
 
 const API = "http://localhost:8080";
 
@@ -129,7 +130,7 @@ function DetailsModal({ game, onClose, onBuy }) {
 
   useEffect(() => {
     axios
-      .get(`${API}/reviews?id=%`)
+      .get(`${API}/reviews?id=${game.id}`)
       .then((r) => setReviews(Array.isArray(r.data) ? r.data.slice(0, 8) : []))
       .catch(() => setReviews([]))
       .finally(() => setLoadingReviews(false));
@@ -328,6 +329,15 @@ function Home() {
   const [buyGame, setBuyGame] = useState(null);
   const [successMsg, setSuccessMsg] = useState("");
 
+  const navigate = useNavigate();
+const user = JSON.parse(localStorage.getItem("user") || "null");
+
+useEffect(() => {
+  if (user?.role === "Seller") {
+    navigate("/seller");
+  }
+}, [user, navigate]);
+
   useEffect(() => {
     axios.get(`${API}/game/all`)
       .then((r) => setGames(r.data))
@@ -342,7 +352,129 @@ function Home() {
       (g.title || "").toLowerCase().includes(search.toLowerCase())
   );
 
-  function handleBuySuccess() {
+
+function BuyModal({ game, onClose, onSuccess }) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const user = JSON.parse(localStorage.getItem("user") || "null");
+  const navigate = useNavigate();
+
+  async function handleBuy() {
+    setLoading(true);
+    setError("");
+
+    try {
+      // 1. Create order first
+      await axios.post(`${API}/orders`, {
+        buyer_id: user.id,
+        game_id: game.id,
+        total_price: game.price,
+        order_status: "Pending",
+        sellers_id: game.seller_id,
+      });
+
+      // 2. Close modal
+      onClose();
+
+      // 3. Optional callback (refresh UI, success message)
+      if (onSuccess) onSuccess();
+
+      // 4. Navigate to checkout page with product data
+      navigate("/checkout", {
+        state: {
+          game,
+        },
+      });
+
+    } catch (err) {
+      setError(err.response?.data?.Message || "Order failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+
+        {/* HEADER */}
+        <div className="modal-header">
+          <h3>🎮 Confirm Purchase</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+
+        {/* ERROR */}
+        {error && <div className="alert alert-error">{error}</div>}
+
+        {/* GAME INFO */}
+        <div className="card" style={{ marginBottom: 20 }}>
+          <div style={{
+            fontSize: 20,
+            fontWeight: 700,
+            fontFamily: "Rajdhani, sans-serif",
+            marginBottom: 4
+          }}>
+            {game.name} — {game.title}
+          </div>
+
+          <div style={{ color: "var(--text2)", fontSize: 13, marginBottom: 12 }}>
+            {game.description}
+          </div>
+
+          <div style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center"
+          }}>
+            <span className="category-badge">{game.category}</span>
+            <span className="game-price">
+              ${Number(game.price).toFixed(2)}
+            </span>
+          </div>
+        </div>
+
+        {/* INFO BOX */}
+        <div style={{
+          background: "rgba(0,212,255,0.06)",
+          border: "1px solid rgba(0,212,255,0.15)",
+          borderRadius: 8,
+          padding: "12px 14px",
+          fontSize: 13,
+          color: "var(--text2)",
+          marginBottom: 20
+        }}>
+          ⚡ Payment is held in escrow until the seller completes your order.
+        </div>
+
+        {/* BUTTONS */}
+        <div style={{ display: "flex", gap: 10 }}>
+          <button
+            className="btn btn-ghost btn-full"
+            onClick={onClose}
+            disabled={loading}
+          >
+            Cancel
+          </button>
+
+          <button
+            className="btn btn-primary btn-full"
+            onClick={handleBuy}
+            disabled={loading}
+          >
+            {loading
+              ? "Processing..."
+              : `Pay $${Number(game.price).toFixed(2)}`}
+          </button>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+
+function handleBuySuccess() {
     setBuyGame(null);
     setSuccessMsg("✅ Order placed! Check My Orders for updates.");
     setTimeout(() => setSuccessMsg(""), 5000);

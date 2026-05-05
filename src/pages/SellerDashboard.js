@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import Navbar from "../compenent/Navbar";
 import Footer from "../compenent/Footer";
-
+import { useNavigate } from "react-router-dom";
 const API = "http://localhost:8080";
 
 function AddGameModal({ user, onClose, onSuccess }) {
@@ -160,8 +160,10 @@ function EditGameModal({ game, onClose, onSuccess }) {
 }
 
 function SellerDashboard() {
+  // ✅ declare ONCE only
   const user = JSON.parse(localStorage.getItem("user") || "null");
-  console.log(user)
+  const navigate = useNavigate();
+
   const [games, setGames] = useState([]);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -169,26 +171,36 @@ function SellerDashboard() {
   const [showAdd, setShowAdd] = useState(false);
   const [editGame, setEditGame] = useState(null);
   const [successMsg, setSuccessMsg] = useState("");
-  var x,y;
 
+  // ✅ Protect route
+  useEffect(() => {
+    if (user?.role !== "Seller") {
+      navigate("/home");
+    }
+  }, [user, navigate]);
+
+  // ✅ Fetch data
   function fetchAll() {
-    const sellerId = user.seller_id || user.id;
-    console.log(sellerId)
+    const sellerId = user?.seller_id || user?.id;
+
     Promise.all([
-      axios.get(`${API}/game/search?keyword=seller_id&keyvalue=${sellerId}&sort=desc`).catch(() => ({ data: [] })),
-      axios.get(`${API}/orders/search?keyword=sellers_id&keyvalue=${sellerId}&sort=desc`).catch(() => ({ data: [] })),
-    ]).then(([g, o]) => {
-      setGames(Array.isArray(g.data) ? g.data : []);
-      
-      console.log(g.data)
-      
-      console.log(o.data)
-      setOrders(Array.isArray(o.data) ? o.data : []);
-    }).finally(() => setLoading(false));
+      axios
+        .get(`${API}/game/search?keyword=seller_id&keyvalue=${sellerId}&sort=desc`)
+        .catch(() => ({ data: [] })),
+      axios
+        .get(`${API}/orders/search?keyword=sellers_id&keyvalue=${sellerId}&sort=desc`)
+        .catch(() => ({ data: [] })),
+    ])
+      .then(([g, o]) => {
+        setGames(Array.isArray(g.data) ? g.data : []);
+        setOrders(Array.isArray(o.data) ? o.data : []);
+      })
+      .finally(() => setLoading(false));
   }
 
-  console.log(x,y)
-  useEffect(() => { fetchAll(); }, []);
+  useEffect(() => {
+    fetchAll();
+  }, []);
 
   function showSuccess(msg) {
     setSuccessMsg(msg);
@@ -197,6 +209,7 @@ function SellerDashboard() {
 
   async function deleteGame(id) {
     if (!window.confirm("Delete this listing?")) return;
+
     try {
       await axios.delete(`${API}/game?id=${id}`);
       showSuccess("Listing deleted");
@@ -208,7 +221,9 @@ function SellerDashboard() {
 
   async function updateOrderStatus(id, status) {
     try {
-      await axios.put(`${API}/orders?id=${id}`, { order_status: status });
+      await axios.put(`${API}/orders?id=${id}`, {
+        order_status: status,
+      });
       showSuccess(`Order #${id} marked as ${status}`);
       fetchAll();
     } catch {
@@ -223,6 +238,7 @@ function SellerDashboard() {
   return (
     <div className="page-wrapper">
       <Navbar />
+
       <div className="page-content" style={{ flex: 1 }}>
         <div className="page-header">
           <h1>🎮 Seller Dashboard</h1>
@@ -231,44 +247,70 @@ function SellerDashboard() {
 
         {successMsg && <div className="alert alert-success">{successMsg}</div>}
 
+        {/* Stats */}
         <div className="stats-grid">
           <div className="stat-card cyan">
             <div className="stat-label">Active Listings</div>
             <div className="stat-value">{games.length}</div>
           </div>
+
           <div className="stat-card purple">
             <div className="stat-label">Total Orders</div>
             <div className="stat-value">{orders.length}</div>
           </div>
+
           <div className="stat-card amber">
             <div className="stat-label">Pending Orders</div>
-            <div className="stat-value">{orders.filter((o) => o.order_status === "Pending").length}</div>
+            <div className="stat-value">
+              {orders.filter((o) => o.order_status === "Pending").length}
+            </div>
           </div>
+
           <div className="stat-card green">
             <div className="stat-label">Revenue</div>
-            <div className="stat-value">${totalRevenue.toFixed(0)}</div>
+            <div className="stat-value">
+              ${totalRevenue.toFixed(0)}
+            </div>
           </div>
         </div>
 
+        {/* Tabs */}
         <div className="tabs">
-          <button className={`tab ${tab === "listings" ? "active" : ""}`} onClick={() => setTab("listings")}>
+          <button
+            className={`tab ${tab === "listings" ? "active" : ""}`}
+            onClick={() => setTab("listings")}
+          >
             🎮 My Listings
           </button>
-          <button className={`tab ${tab === "orders" ? "active" : ""}`} onClick={() => setTab("orders")}>
+
+          <button
+            className={`tab ${tab === "orders" ? "active" : ""}`}
+            onClick={() => setTab("orders")}
+          >
             📦 Orders
           </button>
         </div>
 
+        {/* Content */}
         {loading ? (
-          <div className="loading-wrap"><div className="loading-spinner" /></div>
+          <div className="loading-wrap">
+            <div className="loading-spinner" />
+          </div>
         ) : tab === "listings" ? (
           <>
             <div className="section-header">
-              <span className="section-title">Listings ({games.length})</span>
-              <button className="btn btn-primary" onClick={() => setShowAdd(true)}>
+              <span className="section-title">
+                Listings ({games.length})
+              </span>
+
+              <button
+                className="btn btn-primary"
+                onClick={() => setShowAdd(true)}
+              >
                 ➕ Add Listing
               </button>
             </div>
+
             {games.length === 0 ? (
               <div className="empty-state">
                 <span className="empty-icon">🎮</span>
@@ -288,26 +330,29 @@ function SellerDashboard() {
                       <th>Actions</th>
                     </tr>
                   </thead>
+
                   <tbody>
                     {games.map((g) => (
                       <tr key={g.id}>
-                        <td style={{ color: "var(--text3)" }}>#{g.id}</td>
-                        <td style={{ color: "var(--text)", fontWeight: 600, textTransform: "capitalize" }}>
-                          {g.name}
-                        </td>
+                        <td>#{g.id}</td>
+                        <td>{g.name}</td>
                         <td>{g.title}</td>
-                        <td><span className="category-badge">{g.category}</span></td>
-                        <td style={{ color: "var(--accent)", fontWeight: 600 }}>
-                          ${Number(g.price).toFixed(2)}
-                        </td>
-                        <td style={{ color: g.stock_quantity > 0 ? "var(--success)" : "var(--danger)" }}>
-                          {g.stock_quantity}
-                        </td>
+                        <td>{g.category}</td>
+                        <td>${Number(g.price).toFixed(2)}</td>
+                        <td>{g.stock_quantity}</td>
+
                         <td>
-                          <div style={{ display: "flex", gap: 6 }}>
-                            <button className="btn btn-sm btn-ghost" onClick={() => setEditGame(g)}>✏️ Edit</button>
-                            <button className="btn btn-sm btn-danger" onClick={() => deleteGame(g.id)}>🗑 Delete</button>
-                          </div>
+                          <button
+                            onClick={() => setEditGame(g)}
+                          >
+                            ✏️ Edit
+                          </button>
+
+                          <button
+                            onClick={() => deleteGame(g.id)}
+                          >
+                            🗑 Delete
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -319,11 +364,14 @@ function SellerDashboard() {
         ) : (
           <>
             <div className="section-header">
-              <span className="section-title">Orders ({orders.length})</span>
+              <span className="section-title">
+                Orders ({orders.length})
+              </span>
             </div>
+
             {orders.length === 0 ? (
               <div className="empty-state">
-                <span className="empty-icon">📦</span>
+                <span>📦</span>
                 <p>No orders yet</p>
               </div>
             ) : (
@@ -331,52 +379,43 @@ function SellerDashboard() {
                 <table>
                   <thead>
                     <tr>
-                      <th>Order ID</th>
-                      <th>Buyer ID</th>
-                      <th>username</th>
-                      <th>Game ID</th>
+                      <th>ID</th>
+                      <th>Buyer</th>
+                      <th>Username</th>
+                      <th>Game</th>
                       <th>Amount</th>
                       <th>Status</th>
                       <th>Date</th>
-                      <th>Actions</th>
+                      <th>Action</th>
                     </tr>
                   </thead>
+
                   <tbody>
                     {orders.map((o) => (
                       <tr key={o.id}>
-                      <td style={{ color: "var(--text)", fontWeight: 600 }}>#{o.id}</td>
+                        <td>#{o.id}</td>
+                        <td>{o.buyer_id}</td>
+                        <td>{o.username || "—"}</td>
+                        <td>{o.game_id}</td>
+                        <td>${Number(o.total_price).toFixed(2)}</td>
+                        <td>{o.order_status}</td>
+                        <td>
+                          {o.created_at
+                            ? new Date(o.created_at).toLocaleDateString()
+                            : "—"}
+                        </td>
 
-                      <td>User #{o.buyer_id}</td>
-
-                      {/*  show username here */}
-                      <td>{o.username || "—"}</td>
-
-                     <td>Game #{o.game_id}</td>
-
-                     <td style={{ color: "var(--accent)", fontWeight: 600 }}>
-                       ${Number(o.total_price).toFixed(2)}
-                      </td>
-
-                      <td>
-                      <span className={`status-pill ${o.order_status}`}>
-                       {o.order_status}
-                      </span>
-                      </td>
-
-                      <td style={{ color: "var(--text3)" }}>
-                       {o.created_at ? new Date(o.created_at).toLocaleDateString() : "—"}
-                      </td>
-
-                      <td>
-                       {o.order_status === "Pending" && (
-                      <button
-                        className="btn btn-sm btn-success"
-                       onClick={() => updateOrderStatus(o.id, "Completed")}
-                       >
-                      ✅ Complete
-                       </button>
-                      )}
-                      </td>
+                        <td>
+                          {o.order_status === "Pending" && (
+                            <button
+                              onClick={() =>
+                                updateOrderStatus(o.id, "Completed")
+                              }
+                            >
+                              ✅ Complete
+                            </button>
+                          )}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -387,23 +426,10 @@ function SellerDashboard() {
         )}
       </div>
 
-      {showAdd && (
-        <AddGameModal
-          user={user}
-          onClose={() => setShowAdd(false)}
-          onSuccess={() => { setShowAdd(false); showSuccess("✅ Listing added!"); fetchAll(); }}
-        />
-      )}
-      {editGame && (
-        <EditGameModal
-          game={editGame}
-          onClose={() => setEditGame(null)}
-          onSuccess={() => { setEditGame(null); showSuccess("✅ Listing updated!"); fetchAll(); }}
-        />
-      )}
       <Footer />
     </div>
   );
 }
+
 
 export default SellerDashboard;

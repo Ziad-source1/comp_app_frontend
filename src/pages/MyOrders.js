@@ -79,6 +79,7 @@ function ReviewModal({ order, onClose, onSuccess }) {
     setError("");
     try {
       await axios.post(`${API}/reviews`, {
+        game_id: order.game_id,
         order_id: order.id,
         rating,
         comment,
