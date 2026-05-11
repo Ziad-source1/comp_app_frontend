@@ -46,29 +46,31 @@ function Checkout() {
 
   // 💳 CONFIRM PAYMENT
   async function confirmPayment() {
-    setLoading(true);
-    setError("");
-    setSuccess("");
+  setLoading(true);
+  setError("");
+  setSuccess("");
 
-    try {
-      await axios.put(`${API}/orders/confirm`, {
-        buyer_id: user.id,
-        game_id: game.id,
-        card_info: card, // (optional backend usage)
-      });
+  try {
+    await axios.post(`${API}/orders`, {
+      buyer_id: user.id,
+      game_id: game.id,
+      total_price: game.price,
+      order_status: "Pending",
+      sellers_id: game.seller_id,
+    });
 
-      setSuccess("🎉 Payment successful!");
+    setSuccess("🎉 Payment successful!");
 
-      setTimeout(() => {
-        navigate("/my-orders");
-      }, 2000);
+    setTimeout(() => {
+      navigate("/my-orders");
+    }, 2000);
 
-    } catch (err) {
-      setError("❌ Payment failed");
-    } finally {
-      setLoading(false);
-    }
+  } catch (err) {
+    setError("❌ Payment failed. Please try again.");
+  } finally {
+    setLoading(false);
   }
+}
 
   return (
     <div className="checkout-page">

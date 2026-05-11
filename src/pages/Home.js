@@ -66,11 +66,13 @@ function BuyModal({ game, onClose, onSuccess }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const user = JSON.parse(localStorage.getItem("user") || "null");
+  const navigate = useNavigate();
 
   async function handleBuy() {
     setLoading(true);
     setError("");
     try {
+      // 1. Create order
       await axios.post(`${API}/orders`, {
         buyer_id: user.id,
         game_id: game.id,
@@ -78,7 +80,21 @@ function BuyModal({ game, onClose, onSuccess }) {
         order_status: "Pending",
         sellers_id: game.seller_id,
       });
-      onSuccess();
+
+      // 2. Reduce stock by 1
+      await axios.put(`${API}/game?id=${game.id}`, {
+        description: game.description,
+        price: Number(game.price),
+        stock_quantity: Number(game.stock_quantity) - 1,
+      });
+
+      // 3. Close and notify
+      onClose();
+      if (onSuccess) onSuccess();
+
+      // 4. Go to checkout
+      navigate("/checkout", { state: { game } });
+
     } catch (err) {
       setError(err.response?.data?.Message || "Order failed");
     } finally {
@@ -111,7 +127,7 @@ function BuyModal({ game, onClose, onSuccess }) {
           ⚡ Payment is held in escrow until the seller completes your order.
         </div>
         <div style={{ display: "flex", gap: 10 }}>
-          <button className="btn btn-ghost btn-full" onClick={onClose}>Cancel</button>
+          <button className="btn btn-ghost btn-full" onClick={onClose} disabled={loading}>Cancel</button>
           <button className="btn btn-primary btn-full" onClick={handleBuy} disabled={loading}>
             {loading ? "Processing..." : `Pay $${Number(game.price).toFixed(2)}`}
           </button>
@@ -129,11 +145,28 @@ function DetailsModal({ game, onClose, onBuy }) {
   const gradient = BANNER_GRADIENTS[game.id % BANNER_GRADIENTS.length];
 
   useEffect(() => {
-    axios
-      .get(`${API}/reviews?id=${game.id}`)
-      .then((r) => setReviews(Array.isArray(r.data) ? r.data.slice(0, 8) : []))
-      .catch(() => setReviews([]))
-      .finally(() => setLoadingReviews(false));
+    const fetchReviews = async () => {
+      try {
+        const ordersRes = await axios.get(
+          `${API}/orders/search?keyword=game_id&keyvalue=${game.id}&sort=asc`
+        );
+        const orders = Array.isArray(ordersRes.data) ? ordersRes.data : [];
+        if (orders.length === 0) { setReviews([]); return; }
+        const results = await Promise.all(
+          orders.map((o) =>
+            axios.get(`${API}/reviews/search?keyword=order_id&keyvalue=${o.id}&sort=asc`)
+              .catch(() => ({ data: [] }))
+          )
+        );
+        const allReviews = results.flatMap((r) => Array.isArray(r.data) ? r.data : []);
+        setReviews(allReviews.slice(0, 8));
+      } catch {
+        setReviews([]);
+      } finally {
+        setLoadingReviews(false);
+      }
+    };
+    fetchReviews();
   }, [game.id]);
 
   const avgRating = reviews.length
@@ -155,16 +188,10 @@ function DetailsModal({ game, onClose, onBuy }) {
           position: "relative",
         }}
       >
-        {/* Banner */}
         <div style={{
-          height: 180,
-          background: gradient,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          position: "relative",
-          borderRadius: "16px 16px 0 0",
-          flexShrink: 0,
+          height: 180, background: gradient,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          position: "relative", borderRadius: "16px 16px 0 0", flexShrink: 0,
         }}>
           <span style={{ fontSize: 72 }}>{emoji}</span>
           <span className="category-badge" style={{ position: "absolute", top: 16, right: 16, fontSize: 12, padding: "5px 12px" }}>
@@ -178,8 +205,6 @@ function DetailsModal({ game, onClose, onBuy }) {
         </div>
 
         <div style={{ padding: 28 }}>
-
-          {/* Title + price */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
             <div>
               <h2 style={{ fontFamily: "Rajdhani, sans-serif", fontSize: 28, fontWeight: 700, textTransform: "capitalize" }}>
@@ -192,7 +217,6 @@ function DetailsModal({ game, onClose, onBuy }) {
             </div>
           </div>
 
-          {/* Avg rating */}
           {avgRating && (
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
               <Stars rating={Math.round(avgRating)} />
@@ -205,7 +229,6 @@ function DetailsModal({ game, onClose, onBuy }) {
 
           <div style={{ height: 1, background: "var(--border)", margin: "16px 0" }} />
 
-          {/* Info grid */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 20 }}>
             {[
               { label: "Category", value: game.category, color: null },
@@ -230,7 +253,6 @@ function DetailsModal({ game, onClose, onBuy }) {
             ))}
           </div>
 
-          {/* Description */}
           <div style={{ marginBottom: 20 }}>
             <div style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "var(--text3)", marginBottom: 8 }}>
               Description
@@ -240,65 +262,44 @@ function DetailsModal({ game, onClose, onBuy }) {
             </div>
           </div>
 
-          {/* Escrow notice */}
           <div style={{
             background: "rgba(0,212,255,0.06)", border: "1px solid rgba(0,212,255,0.15)",
             borderRadius: 8, padding: "12px 16px", fontSize: 13, color: "var(--text2)",
             marginBottom: 20, display: "flex", alignItems: "flex-start", gap: 10
           }}>
             <span style={{ fontSize: 18 }}>🔐</span>
-            <span>
-              Your payment is protected by escrow. Funds are only released to the seller after delivery.
-              You can open a dispute if something goes wrong.
-            </span>
+            <span>Your payment is protected by escrow. Funds are only released to the seller after delivery. You can open a dispute if something goes wrong.</span>
           </div>
 
-          {/* CTA */}
           {user?.role === "Buyer" && game.stock_quantity > 0 && (
-            <button
-              className="btn btn-primary btn-full btn-lg"
-              onClick={() => { onClose(); onBuy(game); }}
-            >
+            <button className="btn btn-primary btn-full btn-lg" onClick={() => { onClose(); onBuy(game); }}>
               🛒 Buy Now — ${Number(game.price).toFixed(2)}
             </button>
           )}
           {user?.role === "Buyer" && game.stock_quantity === 0 && (
-            <button className="btn btn-full btn-lg" disabled style={{ opacity: 0.4 }}>
-              Out of Stock
-            </button>
+            <button className="btn btn-full btn-lg" disabled style={{ opacity: 0.4 }}>Out of Stock</button>
           )}
           {user?.role !== "Buyer" && (
             <div style={{ textAlign: "center", color: "var(--text3)", fontSize: 13, padding: "10px 0" }}>
-              {user?.role === "Seller"
-                ? "Sellers cannot purchase listings"
-                : "Log in as a Buyer to purchase"}
+              {user?.role === "Seller" ? "Sellers cannot purchase listings" : "Log in as a Buyer to purchase"}
             </div>
           )}
 
-          {/* Reviews */}
           <div style={{ height: 1, background: "var(--border)", margin: "24px 0 20px" }} />
           <div style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", color: "var(--text3)", marginBottom: 14 }}>
             Customer Reviews
           </div>
 
           {loadingReviews ? (
-            <div style={{ color: "var(--text3)", fontSize: 13, textAlign: "center", padding: 20 }}>
-              Loading reviews...
-            </div>
+            <div style={{ color: "var(--text3)", fontSize: 13, textAlign: "center", padding: 20 }}>Loading reviews...</div>
           ) : reviews.length === 0 ? (
-            <div style={{
-              background: "var(--bg2)", borderRadius: 8, padding: 20,
-              textAlign: "center", color: "var(--text3)", fontSize: 13
-            }}>
+            <div style={{ background: "var(--bg2)", borderRadius: 8, padding: 20, textAlign: "center", color: "var(--text3)", fontSize: 13 }}>
               No reviews yet — be the first to purchase and leave one!
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {reviews.map((rev) => (
-                <div key={rev.id} style={{
-                  background: "var(--bg2)", borderRadius: 8, padding: "14px 16px",
-                  border: "1px solid var(--border)"
-                }}>
+                <div key={rev.id} style={{ background: "var(--bg2)", borderRadius: 8, padding: "14px 16px", border: "1px solid var(--border)" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
                     <Stars rating={rev.rating} />
                     <span style={{ fontSize: 11, color: "var(--text3)" }}>
@@ -312,14 +313,12 @@ function DetailsModal({ game, onClose, onBuy }) {
               ))}
             </div>
           )}
-
         </div>
       </div>
     </div>
   );
 }
 
-/* ─── Home Page ─── */
 function Home() {
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -330,13 +329,11 @@ function Home() {
   const [successMsg, setSuccessMsg] = useState("");
 
   const navigate = useNavigate();
-const user = JSON.parse(localStorage.getItem("user") || "null");
+  const user = JSON.parse(localStorage.getItem("user") || "null");
 
-useEffect(() => {
-  if (user?.role === "Seller") {
-    navigate("/seller");
-  }
-}, [user, navigate]);
+  useEffect(() => {
+    if (user?.role === "Seller") navigate("/seller");
+  }, [user, navigate]);
 
   useEffect(() => {
     axios.get(`${API}/game/all`)
@@ -352,129 +349,7 @@ useEffect(() => {
       (g.title || "").toLowerCase().includes(search.toLowerCase())
   );
 
-
-function BuyModal({ game, onClose, onSuccess }) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  const user = JSON.parse(localStorage.getItem("user") || "null");
-  const navigate = useNavigate();
-
-  async function handleBuy() {
-    setLoading(true);
-    setError("");
-
-    try {
-      // 1. Create order first
-      await axios.post(`${API}/orders`, {
-        buyer_id: user.id,
-        game_id: game.id,
-        total_price: game.price,
-        order_status: "Pending",
-        sellers_id: game.seller_id,
-      });
-
-      // 2. Close modal
-      onClose();
-
-      // 3. Optional callback (refresh UI, success message)
-      if (onSuccess) onSuccess();
-
-      // 4. Navigate to checkout page with product data
-      navigate("/checkout", {
-        state: {
-          game,
-        },
-      });
-
-    } catch (err) {
-      setError(err.response?.data?.Message || "Order failed");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={(e) => e.stopPropagation()}>
-
-        {/* HEADER */}
-        <div className="modal-header">
-          <h3>🎮 Confirm Purchase</h3>
-          <button className="modal-close" onClick={onClose}>×</button>
-        </div>
-
-        {/* ERROR */}
-        {error && <div className="alert alert-error">{error}</div>}
-
-        {/* GAME INFO */}
-        <div className="card" style={{ marginBottom: 20 }}>
-          <div style={{
-            fontSize: 20,
-            fontWeight: 700,
-            fontFamily: "Rajdhani, sans-serif",
-            marginBottom: 4
-          }}>
-            {game.name} — {game.title}
-          </div>
-
-          <div style={{ color: "var(--text2)", fontSize: 13, marginBottom: 12 }}>
-            {game.description}
-          </div>
-
-          <div style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center"
-          }}>
-            <span className="category-badge">{game.category}</span>
-            <span className="game-price">
-              ${Number(game.price).toFixed(2)}
-            </span>
-          </div>
-        </div>
-
-        {/* INFO BOX */}
-        <div style={{
-          background: "rgba(0,212,255,0.06)",
-          border: "1px solid rgba(0,212,255,0.15)",
-          borderRadius: 8,
-          padding: "12px 14px",
-          fontSize: 13,
-          color: "var(--text2)",
-          marginBottom: 20
-        }}>
-          ⚡ Payment is held in escrow until the seller completes your order.
-        </div>
-
-        {/* BUTTONS */}
-        <div style={{ display: "flex", gap: 10 }}>
-          <button
-            className="btn btn-ghost btn-full"
-            onClick={onClose}
-            disabled={loading}
-          >
-            Cancel
-          </button>
-
-          <button
-            className="btn btn-primary btn-full"
-            onClick={handleBuy}
-            disabled={loading}
-          >
-            {loading
-              ? "Processing..."
-              : `Pay $${Number(game.price).toFixed(2)}`}
-          </button>
-        </div>
-
-      </div>
-    </div>
-  );
-}
-
-
-function handleBuySuccess() {
+  function handleBuySuccess() {
     setBuyGame(null);
     setSuccessMsg("✅ Order placed! Check My Orders for updates.");
     setTimeout(() => setSuccessMsg(""), 5000);
@@ -504,11 +379,8 @@ function handleBuySuccess() {
         {!loading && !error && (
           <>
             <div style={{ marginBottom: 16, color: "var(--text3)", fontSize: 13 }}>
-              {search
-                ? `${filtered.length} results for "${search}"`
-                : `${filtered.length} listings available`}
+              {search ? `${filtered.length} results for "${search}"` : `${filtered.length} listings available`}
             </div>
-
             {filtered.length > 0 ? (
               <div className="games-grid">
                 {filtered.map((game) => (
@@ -543,6 +415,7 @@ function handleBuySuccess() {
           onSuccess={handleBuySuccess}
         />
       )}
+
       <Footer />
     </div>
   );

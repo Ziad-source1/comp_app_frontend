@@ -1,7 +1,10 @@
 import { Link } from "react-router-dom";
+import { FaXTwitter, FaYoutube, FaDiscord, FaInstagram } from "react-icons/fa6";
 
 function Footer() {
   const user = JSON.parse(localStorage.getItem("user") || "null");
+
+  if (user?.role === "Admin") return null;
 
   return (
     <footer style={{
@@ -42,10 +45,10 @@ function Footer() {
           {/* Social icons */}
           <div style={{ display: "flex", gap: 10 }}>
             {[
-              { icon: "𝕏", label: "Twitter",    href: "https://twitter.com" },
-              { icon: "▶", label: "YouTube",    href: "https://youtube.com" },
-              { icon: "💬", label: "Discord",   href: "https://discord.com" },
-              { icon: "📷", label: "Instagram", href: "https://instagram.com" },
+              { icon: <FaXTwitter />,  label: "Twitter",   href: "https://twitter.com" },
+              { icon: <FaYoutube />,   label: "YouTube",   href: "https://youtube.com" },
+              { icon: <FaDiscord />,   label: "Discord",   href: "https://discord.com" },
+              { icon: <FaInstagram />, label: "Instagram", href: "https://instagram.com" },
             ].map(({ icon, label, href }) => (
               <a
                 key={label}

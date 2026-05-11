@@ -342,18 +342,21 @@ function SellerDashboard() {
                         <td>{g.stock_quantity}</td>
 
                         <td>
-                          <button
-                            onClick={() => setEditGame(g)}
-                          >
-                            ✏️ Edit
-                          </button>
-
-                          <button
-                            onClick={() => deleteGame(g.id)}
-                          >
-                            🗑 Delete
-                          </button>
-                        </td>
+  <div style={{ display: "flex", gap: 6 }}>
+    <button
+      className="btn btn-sm btn-ghost"
+      onClick={() => setEditGame(g)}
+    >
+      ✏️ Edit
+    </button>
+    <button
+      className="btn btn-sm btn-danger"
+      onClick={() => deleteGame(g.id)}
+    >
+      🗑 Delete
+    </button>
+  </div>
+</td>
                       </tr>
                     ))}
                   </tbody>
@@ -408,12 +411,11 @@ function SellerDashboard() {
                         <td>
                           {o.order_status === "Pending" && (
                             <button
-                              onClick={() =>
-                                updateOrderStatus(o.id, "Completed")
-                              }
-                            >
-                              ✅ Complete
-                            </button>
+  className="btn btn-sm btn-success"
+  onClick={() => updateOrderStatus(o.id, "Completed")}
+>
+  ✅ Complete
+</button>
                           )}
                         </td>
                       </tr>
@@ -427,9 +429,33 @@ function SellerDashboard() {
       </div>
 
       <Footer />
+
+      {showAdd && (
+        <AddGameModal
+          user={user}
+          onClose={() => setShowAdd(false)}
+          onSuccess={() => {
+            setShowAdd(false);
+            showSuccess("✅ Listing added!");
+            fetchAll();
+          }}
+        />
+      )}
+
+      {editGame && (
+        <EditGameModal
+          game={editGame}
+          onClose={() => setEditGame(null)}
+          onSuccess={() => {
+            setEditGame(null);
+            showSuccess("✅ Listing updated!");
+            fetchAll();
+          }}
+        />
+      )}
+
     </div>
   );
 }
-
 
 export default SellerDashboard;
