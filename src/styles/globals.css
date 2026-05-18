@@ -1,24 +1,63 @@
 @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Outfit:wght@300;400;500;600&display=swap');
 
+/* ================================================================
+   🎨 THEME VARIABLES — THE MOST IMPORTANT SECTION
+   Change values here to restyle the ENTIRE website at once.
+   Every color, border, and radius used across all pages comes
+   from these variables.
+   ================================================================ */
+
 :root {
+  /* ── Page Backgrounds ──────────────────────────────────────
+     --bg      = darkest background (page background)
+     --bg2     = slightly lighter (inputs, modals, footer)
+     --bg3     = third level (select dropdowns)              */
   --bg: #080b14;
   --bg2: #0d1220;
   --bg3: #111827;
+
+  /* ── Surface Colors ────────────────────────────────────────
+     --surface  = cards, navbar, modals
+     --surface2 = table headers, secondary surfaces          */
   --surface: #141c2e;
   --surface2: #1a2540;
-  --border: #1f2d4a;
-  --accent: #00d4ff;
-  --accent2: #7c3aed;
-  --accent3: #f59e0b;
+
+  /* ── Border ─────────────────────────────────────────────── */
+  --border: #1f2d4a;    /* All borders and dividers */
+
+  /* ── Accent Colors — CHANGE THESE TO CHANGE THE MAIN LOOK ─
+     --accent  = primary color: Buy buttons, links, search btn, price text
+     --accent2 = secondary color: active tab, logo gradient, role badge
+     --accent3 = amber: stars, warnings, admin badge, pending status  */
+  --accent: #00d4ff;    /* 🔵 Cyan  — main brand color */
+  --accent2: #7c3aed;   /* 🟣 Purple — secondary brand color */
+  --accent3: #f59e0b;   /* 🟡 Amber  — warnings and highlights */
+
+  /* ── Status Colors ─────────────────────────────────────────
+     --danger  = red: errors, delete buttons, rejected/cancelled status
+     --success = green: success messages, completed/verified status    */
   --danger: #ef4444;
   --success: #10b981;
+
+  /* ── Text Colors ────────────────────────────────────────────
+     --text  = primary text (headings, important content)
+     --text2 = secondary text (descriptions, table cell data)
+     --text3 = muted text (labels, placeholders, dates, captions) */
   --text: #e2e8f0;
   --text2: #94a3b8;
   --text3: #64748b;
+
+  /* ── Shape & Effects ────────────────────────────────────────
+     --radius = corner roundness for all cards and buttons
+     --glow   = glow shadow used on hover effects             */
   --radius: 10px;
   --glow: 0 0 20px rgba(0, 212, 255, 0.15);
 }
 
+/* ================================================================
+   ☀️ LIGHT MODE — overrides dark colors when user clicks ☀️
+   Only colors that need to change in light mode are listed here.
+   ================================================================ */
 [data-theme="light"] {
   --bg: #f0f4f8;
   --bg2: #e2e8f0;
@@ -31,6 +70,7 @@
   --text3: #94a3b8;
 }
 
+/* Light mode: navbar gets a lighter background */
 [data-theme="light"] .navbar {
   background: rgba(240, 244, 248, 0.95);
 }
@@ -38,8 +78,14 @@
 [data-theme="light"] .auth-page {
   background: var(--bg);
 }
+
+/* ================================================================
+   🔧 GLOBAL RESET
+   ================================================================ */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* ── Body Font ──────────────────────────────────────────────────
+   Change 'Outfit' to any Google Font name to change body text font */
 body {
   font-family: 'Outfit', sans-serif;
   background: var(--bg);
@@ -48,18 +94,28 @@ body {
   line-height: 1.6;
 }
 
+/* ── Heading Font ───────────────────────────────────────────────
+   Change 'Rajdhani' to change the font of all h1/h2/h3/h4 titles */
 h1, h2, h3, h4 {
   font-family: 'Rajdhani', sans-serif;
   letter-spacing: 0.03em;
 }
 
-/* Scrollbar */
+/* ================================================================
+   📜 SCROLLBAR — the thin scrollbar on the right side of the page
+   Change --border to change track color
+   Change --accent2 to change thumb hover color
+   ================================================================ */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg2); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--accent2); }
 
-/* Shared layout */
+/* ================================================================
+   📐 PAGE LAYOUT
+   ================================================================ */
+
+/* Wrapper that every page uses — makes footer stick to bottom */
 .page-wrapper {
   min-height: 100vh;
   background: var(--bg);
@@ -67,14 +123,19 @@ h1, h2, h3, h4 {
   flex-direction: column;
 }
 
-/* Navbar */
+/* ================================================================
+   🧭 NAVBAR
+   ── To change navbar height: edit height: 64px
+   ── To change navbar background: edit background: rgba(...)
+   ── To change navbar border: edit border-bottom color
+   ================================================================ */
 .navbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 32px;
-  height: 64px;
-  background: rgba(8, 11, 20, 0.95);
+  height: 64px;                          /* ← change navbar height here */
+  background: rgba(8, 11, 20, 0.95);    /* ← change navbar bg color here */
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--border);
   position: sticky;
@@ -92,7 +153,7 @@ h1, h2, h3, h4 {
 .navbar-brand .logo-icon {
   width: 34px;
   height: 34px;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  background: linear-gradient(135deg, var(--accent), var(--accent2)); /* ← logo icon gradient */
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -102,7 +163,7 @@ h1, h2, h3, h4 {
 
 .navbar-brand span {
   font-family: 'Rajdhani', sans-serif;
-  font-size: 22px;
+  font-size: 22px;          /* ← brand name font size */
   font-weight: 700;
   color: var(--text);
   letter-spacing: 0.05em;
@@ -114,6 +175,8 @@ h1, h2, h3, h4 {
   gap: 8px;
 }
 
+/* ── Search Bar ─────────────────────────────────────────────────
+   Change width: 240px to make the search input wider or narrower  */
 .search-wrap {
   display: flex;
   align-items: center;
@@ -123,7 +186,7 @@ h1, h2, h3, h4 {
   overflow: hidden;
   transition: border-color 0.2s;
 }
-.search-wrap:focus-within { border-color: var(--accent); }
+.search-wrap:focus-within { border-color: var(--accent); } /* ← focus border color */
 
 .search-wrap input {
   background: transparent;
@@ -133,13 +196,15 @@ h1, h2, h3, h4 {
   color: var(--text);
   font-size: 14px;
   font-family: 'Outfit', sans-serif;
-  width: 240px;
+  width: 240px;              /* ← search input width */
 }
 .search-wrap input::placeholder { color: var(--text3); }
 
+/* ── Search Button ──────────────────────────────────────────────
+   Change background: var(--accent) to change the Search button color */
 .search-wrap button {
-  background: var(--accent);
-  color: var(--bg);
+  background: var(--accent);  /* ← Search button background color */
+  color: var(--bg);           /* ← Search button text color */
   border: none;
   padding: 8px 14px;
   cursor: pointer;
@@ -155,6 +220,8 @@ h1, h2, h3, h4 {
   gap: 12px;
 }
 
+/* ── Nav Chips (navbar links like Profile, Orders, Dashboard) ───
+   Change background/color to restyle all navbar link buttons      */
 .nav-chip {
   display: flex;
   align-items: center;
@@ -167,20 +234,23 @@ h1, h2, h3, h4 {
   transition: all 0.2s;
   text-decoration: none;
   border: 1px solid transparent;
-  background: var(--surface);
-  color: var(--text2);
+  background: var(--surface);  /* ← nav chip background */
+  color: var(--text2);         /* ← nav chip text color */
   border-color: var(--border);
 }
 .nav-chip:hover { color: var(--text); border-color: var(--accent); }
 .nav-chip.active { color: var(--accent); border-color: var(--accent); }
 
+/* ── Logout Button ──────────────────────────────────────────────
+   Change color: var(--danger) to change the logout button color   */
 .nav-chip.logout {
-  color: var(--danger);
+  color: var(--danger);                    /* ← logout text color */
   border-color: transparent;
-  background: rgba(239, 68, 68, 0.08);
+  background: rgba(239, 68, 68, 0.08);    /* ← logout background */
 }
 .nav-chip.logout:hover { background: rgba(239, 68, 68, 0.15); }
 
+/* ── User Badge (username + role pill in navbar) ─────────────── */
 .user-badge {
   display: flex;
   align-items: center;
@@ -193,6 +263,8 @@ h1, h2, h3, h4 {
   color: var(--text2);
 }
 
+/* ── Role Pills (BUYER / SELLER / ADMIN badges) ─────────────────
+   Change the background and color for each role pill here         */
 .role-pill {
   font-size: 10px;
   font-weight: 700;
@@ -201,17 +273,27 @@ h1, h2, h3, h4 {
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
-.role-pill.Buyer { background: rgba(0, 212, 255, 0.15); color: var(--accent); }
-.role-pill.Seller { background: rgba(124, 58, 237, 0.15); color: #a78bfa; }
-.role-pill.Admin { background: rgba(245, 158, 11, 0.15); color: var(--accent3); }
+.role-pill.Buyer  { background: rgba(0, 212, 255, 0.15); color: var(--accent); }   /* ← Buyer badge */
+.role-pill.Seller { background: rgba(124, 58, 237, 0.15); color: #a78bfa; }        /* ← Seller badge */
+.role-pill.Admin  { background: rgba(245, 158, 11, 0.15); color: var(--accent3); } /* ← Admin badge */
 
-/* Buttons */
+/* ================================================================
+   🔘 BUTTONS
+   ── btn-primary = main action button (Buy, Save, Submit)
+   ── btn-ghost   = secondary button (Cancel, Back)
+   ── btn-danger  = destructive button (Delete)
+   ── btn-success = positive button (Complete, Verify)
+   ── btn-purple  = purple button
+   ── btn-sm      = small size
+   ── btn-lg      = large size
+   ── btn-full    = full width
+   ================================================================ */
 .btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 9px 20px;
-  border-radius: 8px;
+  border-radius: 8px;        /* ← button corner radius */
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -221,18 +303,25 @@ h1, h2, h3, h4 {
 }
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
+/* ── Primary Button (Buy Now, Confirm, Add Listing) ─────────────
+   Change background: var(--accent) to change the main button color */
 .btn-primary {
-  background: var(--accent);
-  color: var(--bg);
+  background: var(--accent);  /* ← primary button color */
+  color: var(--bg);           /* ← primary button text color */
 }
-.btn-primary:hover:not(:disabled) { filter: brightness(1.1); box-shadow: 0 0 20px rgba(0, 212, 255, 0.3); }
+.btn-primary:hover:not(:disabled) {
+  filter: brightness(1.1);
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.3); /* ← primary button glow on hover */
+}
 
+/* ── Purple Button ── */
 .btn-purple {
-  background: var(--accent2);
+  background: var(--accent2); /* ← purple button color */
   color: white;
 }
 .btn-purple:hover:not(:disabled) { filter: brightness(1.15); }
 
+/* ── Ghost Button (Cancel, Back) ── */
 .btn-ghost {
   background: var(--surface);
   color: var(--text2);
@@ -240,24 +329,31 @@ h1, h2, h3, h4 {
 }
 .btn-ghost:hover:not(:disabled) { border-color: var(--accent); color: var(--text); }
 
+/* ── Danger Button (Delete) ── */
 .btn-danger {
-  background: rgba(239, 68, 68, 0.15);
-  color: var(--danger);
+  background: rgba(239, 68, 68, 0.15);   /* ← danger button background */
+  color: var(--danger);                   /* ← danger button text */
   border: 1px solid rgba(239, 68, 68, 0.3);
 }
 .btn-danger:hover:not(:disabled) { background: rgba(239, 68, 68, 0.25); }
 
+/* ── Success Button (Complete, Verify) ── */
 .btn-success {
-  background: rgba(16, 185, 129, 0.15);
-  color: var(--success);
+  background: rgba(16, 185, 129, 0.15);  /* ← success button background */
+  color: var(--success);                  /* ← success button text */
   border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
-.btn-sm { padding: 6px 12px; font-size: 12px; }
-.btn-lg { padding: 12px 28px; font-size: 16px; }
-.btn-full { width: 100%; justify-content: center; }
+/* ── Button Sizes ── */
+.btn-sm   { padding: 6px 12px; font-size: 12px; }   /* small */
+.btn-lg   { padding: 12px 28px; font-size: 16px; }  /* large */
+.btn-full { width: 100%; justify-content: center; }  /* full width */
 
-/* Cards */
+/* ================================================================
+   🃏 CARDS
+   ── Used for profile sections, checkout items, game details
+   ── Change padding: 20px to adjust card inner spacing
+   ================================================================ */
 .card {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -265,13 +361,17 @@ h1, h2, h3, h4 {
   padding: 20px;
   transition: border-color 0.2s, transform 0.2s;
 }
-.card:hover { border-color: rgba(0, 212, 255, 0.3); }
+.card:hover { border-color: rgba(0, 212, 255, 0.3); } /* ← card hover border color */
 
-/* Game Cards */
+/* ================================================================
+   🎮 GAME CARDS (Home page grid)
+   ── Change minmax(240px, 1fr) to control the minimum card width
+   ── Change gap: 18px to control spacing between cards
+   ================================================================ */
 .games-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); /* ← card min width */
+  gap: 18px;                                                      /* ← space between cards */
 }
 
 .game-card {
@@ -286,13 +386,13 @@ h1, h2, h3, h4 {
   display: block;
 }
 .game-card:hover {
-  border-color: var(--accent);
-  transform: translateY(-4px);
-  box-shadow: 0 8px 32px rgba(0, 212, 255, 0.12);
+  border-color: var(--accent);                         /* ← card hover border */
+  transform: translateY(-4px);                         /* ← card hover lift */
+  box-shadow: 0 8px 32px rgba(0, 212, 255, 0.12);     /* ← card hover shadow */
 }
 
 .game-card-banner {
-  height: 120px;
+  height: 120px;   /* ← game card banner image height */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -305,7 +405,7 @@ h1, h2, h3, h4 {
 
 .game-card-name {
   font-family: 'Rajdhani', sans-serif;
-  font-size: 18px;
+  font-size: 18px;    /* ← game name font size */
   font-weight: 700;
   margin-bottom: 2px;
   text-transform: capitalize;
@@ -324,13 +424,17 @@ h1, h2, h3, h4 {
   margin-top: 10px;
 }
 
+/* ── Game Price Text ─────────────────────────────────────────────
+   Change color: var(--accent) to change the price color on cards  */
 .game-price {
   font-family: 'Rajdhani', sans-serif;
-  font-size: 20px;
+  font-size: 20px;         /* ← price font size */
   font-weight: 700;
-  color: var(--accent);
+  color: var(--accent);    /* ← price color */
 }
 
+/* ── Category Badge (BOOSTING / CURRENCY etc) ───────────────────
+   Change background and color to restyle the category badges      */
 .category-badge {
   font-size: 10px;
   font-weight: 600;
@@ -338,12 +442,14 @@ h1, h2, h3, h4 {
   border-radius: 20px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  background: rgba(124, 58, 237, 0.2);
-  color: #a78bfa;
+  background: rgba(124, 58, 237, 0.2); /* ← badge background */
+  color: #a78bfa;                       /* ← badge text color */
   border: 1px solid rgba(124, 58, 237, 0.3);
 }
 
-/* Forms */
+/* ================================================================
+   🔐 AUTH PAGES (Login & Signup)
+   ================================================================ */
 .auth-page {
   min-height: 100vh;
   display: flex;
@@ -354,29 +460,25 @@ h1, h2, h3, h4 {
   overflow: hidden;
 }
 
-.auth-bg-glow {
-  position: absolute;
-  width: 600px;
-  height: 600px;
-  border-radius: 50%;
-  pointer-events: none;
-}
+/* ── Background Glows on login/signup page ── */
+.auth-bg-glow { position: absolute; width: 600px; height: 600px; border-radius: 50%; pointer-events: none; }
 .auth-bg-glow.tl {
   top: -200px; left: -200px;
-  background: radial-gradient(circle, rgba(0, 212, 255, 0.08) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(0, 212, 255, 0.08) 0%, transparent 70%); /* ← top-left glow color */
 }
 .auth-bg-glow.br {
   bottom: -200px; right: -200px;
-  background: radial-gradient(circle, rgba(124, 58, 237, 0.1) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.1) 0%, transparent 70%); /* ← bottom-right glow color */
 }
 
+/* ── Auth Card (the white/dark box on login/signup) ── */
 .auth-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 40px;
+  border-radius: 16px;      /* ← auth card corner radius */
+  padding: 40px;            /* ← auth card inner spacing */
   width: 100%;
-  max-width: 420px;
+  max-width: 420px;         /* ← auth card max width */
   position: relative;
   z-index: 1;
 }
@@ -391,25 +493,21 @@ h1, h2, h3, h4 {
 
 .auth-logo .logo-icon {
   width: 40px; height: 40px;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  background: linear-gradient(135deg, var(--accent), var(--accent2)); /* ← logo gradient */
   border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
   font-size: 20px;
 }
 
-.auth-logo h1 {
-  font-size: 28px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-}
+.auth-logo h1 { font-size: 28px; font-weight: 700; letter-spacing: 0.05em; }
 
-.auth-subtitle {
-  text-align: center;
-  color: var(--text2);
-  font-size: 14px;
-  margin-bottom: 28px;
-}
+.auth-subtitle { text-align: center; color: var(--text2); font-size: 14px; margin-bottom: 28px; }
 
+/* ================================================================
+   📝 FORM INPUTS (all pages)
+   ── Change border-radius: 8px to adjust input corner roundness
+   ── Change padding: 10px 14px to adjust input inner spacing
+   ================================================================ */
 .form-group { margin-bottom: 16px; }
 
 .form-group label {
@@ -418,7 +516,7 @@ h1, h2, h3, h4 {
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--text3);
+  color: var(--text3);       /* ← form label color */
   margin-bottom: 6px;
 }
 
@@ -426,7 +524,7 @@ h1, h2, h3, h4 {
 .form-group select,
 .form-group textarea {
   width: 100%;
-  background: var(--bg2);
+  background: var(--bg2);    /* ← input background color */
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 10px 14px;
@@ -439,63 +537,45 @@ h1, h2, h3, h4 {
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+  border-color: var(--accent);                       /* ← input focus border color */
+  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);     /* ← input focus glow */
 }
 .form-group select option { background: var(--bg3); }
 .form-group textarea { resize: vertical; min-height: 80px; }
 
-.auth-footer {
-  text-align: center;
-  margin-top: 20px;
-  font-size: 13px;
-  color: var(--text3);
-}
-.auth-footer a {
-  color: var(--accent);
-  text-decoration: none;
-  font-weight: 500;
-}
+.auth-footer { text-align: center; margin-top: 20px; font-size: 13px; color: var(--text3); }
+.auth-footer a { color: var(--accent); text-decoration: none; font-weight: 500; }   /* ← auth footer link color */
 .auth-footer a:hover { text-decoration: underline; }
 
-/* Page layout */
+/* ================================================================
+   📄 PAGE LAYOUT
+   ── Change max-width: 1280px to make the content wider or narrower
+   ── Change padding: 32px 24px to adjust page side margins
+   ================================================================ */
 .page-content {
   width: 100%;
-  max-width: 1280px;
+  max-width: 1280px;    /* ← max page content width */
   margin: 0 auto;
-  padding: 32px 24px;
+  padding: 32px 24px;   /* ← page top/side padding */
   flex: 1;
 }
 
-.page-header {
-  margin-bottom: 28px;
-}
-
-.page-header h1 {
-  font-size: 32px;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  margin-bottom: 4px;
-}
-
+.page-header { margin-bottom: 28px; }
+.page-header h1 { font-size: 32px; font-weight: 700; letter-spacing: 0.03em; margin-bottom: 4px; }
 .page-header p { color: var(--text2); font-size: 14px; }
 
-/* Tables */
+/* ================================================================
+   📊 TABLES (Admin Panel, Orders, Seller Dashboard)
+   ================================================================ */
 .table-wrap {
   overflow-x: auto;
   border-radius: var(--radius);
   border: 1px solid var(--border);
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
 
-thead {
-  background: var(--surface2);
-}
+thead { background: var(--surface2); } /* ← table header background */
 
 th {
   padding: 12px 16px;
@@ -504,20 +584,23 @@ th {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.07em;
-  color: var(--text3);
+  color: var(--text3);      /* ← table header text color */
   white-space: nowrap;
 }
 
 td {
   padding: 12px 16px;
   border-top: 1px solid var(--border);
-  color: var(--text2);
+  color: var(--text2);      /* ← table cell text color */
   vertical-align: middle;
 }
 
-tr:hover td { background: rgba(255,255,255,0.02); }
+tr:hover td { background: rgba(255,255,255,0.02); } /* ← table row hover color */
 
-/* Status pills */
+/* ================================================================
+   🏷️ STATUS PILLS (Pending, Completed, Verified, etc.)
+   ── Change background and color for each status to restyle pills
+   ================================================================ */
 .status-pill {
   display: inline-block;
   padding: 3px 10px;
@@ -527,20 +610,27 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
+/* Yellow — Pending, Open, Held */
 .status-pill.Open, .status-pill.Pending, .status-pill.Held {
   background: rgba(245, 158, 11, 0.15); color: var(--accent3);
 }
+/* Green — Completed, Resolved, Released, Verified */
 .status-pill.Resolved, .status-pill.Completed, .status-pill.Released, .status-pill.Verified {
   background: rgba(16, 185, 129, 0.15); color: var(--success);
 }
+/* Red — Rejected, Cancelled, Refunded */
 .status-pill.Rejected, .status-pill.Cancelled, .status-pill.Refunded {
   background: rgba(239, 68, 68, 0.15); color: var(--danger);
 }
+/* Cyan — Paid, In Review */
 .status-pill.Paid, .status-pill.In\ Review {
   background: rgba(0, 212, 255, 0.15); color: var(--accent);
 }
 
-/* Tabs */
+/* ================================================================
+   📑 TABS (Seller Dashboard, Admin Panel)
+   ── Change .tab.active background to change the active tab color
+   ================================================================ */
 .tabs {
   display: flex;
   gap: 4px;
@@ -567,11 +657,14 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 }
 .tab:hover { color: var(--text); }
 .tab.active {
-  background: var(--accent2);
-  color: white;
+  background: var(--accent2);  /* ← active tab background color */
+  color: white;                /* ← active tab text color */
 }
 
-/* Stats grid */
+/* ================================================================
+   📈 STATS CARDS (Dashboard numbers)
+   ── The colored left border is set per card with .cyan/.purple etc
+   ================================================================ */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -586,31 +679,24 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   padding: 16px 20px;
 }
 
-.stat-label {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: var(--text3);
-  margin-bottom: 6px;
-}
+.stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text3); margin-bottom: 6px; }
+.stat-value { font-family: 'Rajdhani', sans-serif; font-size: 28px; font-weight: 700; color: var(--text); }
 
-.stat-value {
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 28px;
-  font-weight: 700;
-  color: var(--text);
-}
+/* ── Stat Card Accent Borders ───────────────────────────────────
+   Change the color value to change each stat card's left border  */
+.stat-card.cyan   { border-left: 3px solid var(--accent); }   /* ← cyan stat card */
+.stat-card.purple { border-left: 3px solid var(--accent2); }  /* ← purple stat card */
+.stat-card.amber  { border-left: 3px solid var(--accent3); }  /* ← amber stat card */
+.stat-card.green  { border-left: 3px solid var(--success); }  /* ← green stat card */
 
-.stat-card.cyan { border-left: 3px solid var(--accent); }
-.stat-card.purple { border-left: 3px solid var(--accent2); }
-.stat-card.amber { border-left: 3px solid var(--accent3); }
-.stat-card.green { border-left: 3px solid var(--success); }
-
-/* Modal overlay */
+/* ================================================================
+   🪟 MODALS (Buy, Dispute, Edit, Review popups)
+   ── Change max-width: 480px to make modals wider or narrower
+   ================================================================ */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.6);
+  background: rgba(0,0,0,0.6);   /* ← modal backdrop darkness */
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
@@ -625,7 +711,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   border-radius: 14px;
   padding: 28px;
   width: 100%;
-  max-width: 480px;
+  max-width: 480px;    /* ← modal max width */
   max-height: 90vh;
   overflow-y: auto;
 }
@@ -637,10 +723,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   margin-bottom: 20px;
 }
 
-.modal-header h3 {
-  font-size: 20px;
-  font-weight: 700;
-}
+.modal-header h3 { font-size: 20px; font-weight: 700; }
 
 .modal-close {
   background: none;
@@ -653,17 +736,17 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 }
 .modal-close:hover { color: var(--text); }
 
-/* Alert messages */
-.alert {
-  padding: 12px 16px;
-  border-radius: 8px;
-  font-size: 13px;
-  margin-bottom: 16px;
-}
-.alert-error { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); }
-.alert-success { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.2); }
+/* ================================================================
+   ⚠️ ALERTS (success/error messages)
+   ================================================================ */
+.alert { padding: 12px 16px; border-radius: 8px; font-size: 13px; margin-bottom: 16px; }
+.alert-error   { background: rgba(239, 68, 68, 0.1);  color: var(--danger);  border: 1px solid rgba(239, 68, 68, 0.2); }   /* ← error alert */
+.alert-success { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.2); } /* ← success alert */
 
-/* Loading & empty */
+/* ================================================================
+   ⏳ LOADING SPINNER & EMPTY STATE
+   ── Change border-top-color to change the spinner color
+   ================================================================ */
 .loading-wrap, .empty-state {
   display: flex;
   flex-direction: column;
@@ -677,7 +760,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 .loading-spinner {
   width: 36px; height: 36px;
   border: 3px solid var(--border);
-  border-top-color: var(--accent);
+  border-top-color: var(--accent);   /* ← spinner color */
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
@@ -687,7 +770,9 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 .empty-icon { font-size: 48px; opacity: 0.5; }
 .empty-state p { font-size: 14px; }
 
-/* Section header row */
+/* ================================================================
+   🗂️ SECTION HEADER (used above tables and lists)
+   ================================================================ */
 .section-header {
   display: flex;
   align-items: center;
@@ -702,25 +787,20 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   letter-spacing: 0.03em;
 }
 
-/* Divider */
-.divider {
-  height: 1px;
-  background: var(--border);
-  margin: 20px 0;
-}
+/* ── Divider line ── */
+.divider { height: 1px; background: var(--border); margin: 20px 0; }
 
-/* Grid 2 col */
-.grid-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
+/* ── Two Column Grid (used in forms) ── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
+/* ================================================================
+   📱 RESPONSIVE — Mobile adjustments (screen width < 768px)
+   ================================================================ */
 @media (max-width: 768px) {
-  .grid-2 { grid-template-columns: 1fr; }
-  .games-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
-  .navbar { padding: 0 16px; }
-  .navbar-center { display: none; }
-  .page-content { padding: 20px 16px; }
-  .stats-grid { grid-template-columns: 1fr 1fr; }
+  .grid-2         { grid-template-columns: 1fr; }
+  .games-grid     { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+  .navbar         { padding: 0 16px; }
+  .navbar-center  { display: none; }   /* ← hides search bar on mobile */
+  .page-content   { padding: 20px 16px; }
+  .stats-grid     { grid-template-columns: 1fr 1fr; }
 }
